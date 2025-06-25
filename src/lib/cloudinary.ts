@@ -11,7 +11,7 @@ cloudinary.config({
 export async function uploadToCloudinary(
   fileBuffer: Buffer,
   folder: string,
-  resourceType: 'image' | 'video' | 'raw' = 'image'
+  resourceType: 'image' | 'video' | 'raw' | 'auto' = 'image'
 ): Promise<{ url: string; public_id: string }> {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -34,7 +34,7 @@ export async function uploadToCloudinary(
 
 export async function deleteFromCloudinary(
   publicId: string,
-  resourceType: 'image' | 'video' | 'raw' = 'image'
+  resourceType: 'image' | 'video' | 'raw' | 'auto' = 'image'
 ): Promise<{ result: string }> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(

@@ -32,7 +32,14 @@ export default function AdminResumePage() {
     try {
       const res = await fetch('/api/admin/resume');
       const data = await res.json();
-      setResumes(Array.isArray(data) ? data : data ? [data] : []);
+      // Ensure each resume has a unique _id for key
+      if (Array.isArray(data)) {
+        setResumes(data.filter(r => r._id));
+      } else if (data && data._id) {
+        setResumes([data]);
+      } else {
+        setResumes([]);
+      }
     } catch {
       setAlert({ type: 'error', message: 'Failed to load resumes' });
     } finally {
@@ -191,8 +198,8 @@ export default function AdminResumePage() {
               </tr>
             </thead>
             <tbody>
-              {resumes.map((resume) => (
-                <tr key={resume._id} className="border-b dark:border-gray-700">
+              {resumes.map((resume, idx) => (
+                <tr key={resume._id || idx} className="border-b dark:border-gray-700">
                   <td className="px-4 py-2 font-medium">
                     <a href={resume.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
                       <FiEye /> {resume.fileName}

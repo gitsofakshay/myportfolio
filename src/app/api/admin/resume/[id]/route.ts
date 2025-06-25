@@ -65,9 +65,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     };
     if (fileBuffer && fileInfo) {
       if (resume.publicId) {
-        await deleteFromCloudinary(resume.publicId, 'raw');
+        await deleteFromCloudinary(resume.publicId, 'auto');
       }
-      const uploadResult = await uploadToCloudinary(fileBuffer, 'portfolio/resumes', 'raw');
+      const uploadResult = await uploadToCloudinary(fileBuffer, 'portfolio/resumes', 'auto');
       updatedFields.fileUrl = uploadResult.url;
       updatedFields.publicId = uploadResult.public_id;
       updatedFields.uploadedAt = new Date();

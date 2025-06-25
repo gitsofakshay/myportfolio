@@ -60,13 +60,12 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   verifyAdminAuth();
   await connectToDatabase();
-
   try {
     const { fileBuffer, fileInfo } = await parseFormData(req);
     if (!fileBuffer || !fileInfo) {
       return NextResponse.json({ error: 'Resume file is required' }, { status: 400 });
     }
-    const uploadResult = await uploadToCloudinary(fileBuffer, 'portfolio/resumes', 'raw');
+    const uploadResult = await uploadToCloudinary(fileBuffer, 'portfolio/resumes', 'auto');
     const newResume = await Resume.create({
       fileUrl: uploadResult.url,
       publicId: uploadResult.public_id,

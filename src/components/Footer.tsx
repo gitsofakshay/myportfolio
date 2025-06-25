@@ -3,6 +3,7 @@
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import * as FaIcons from "react-icons/fa";
+import * as MdIcons from "react-icons/md";
 
 export default function Footer() {
   const [socialLinks, setSocialLinks] = useState<any[]>([]);
@@ -13,11 +14,13 @@ export default function Footer() {
       .then((data) => {
         if (Array.isArray(data)) {
           setSocialLinks(
-            data.filter((l) => l.isActive && l.icon && typeof (FaIcons as any)[l.icon] === "function")
+            data.filter((l) => l.isActive && l.icon && ((FaIcons as any)[l.icon] || (MdIcons as any)[l.icon]))
           );
         }
       });
   }, []);
+
+  const iconPacks: Record<string, React.ComponentType<any>> = { ...FaIcons, ...MdIcons };
 
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700  pt-10 pb-5 text-sm text-gray-600 dark:text-gray-400">
@@ -102,7 +105,7 @@ export default function Footer() {
             </h4>
             <div className="flex space-x-4 text-xl">
               {socialLinks.map((link) => {
-                const Icon = (FaIcons as any)[link.icon];
+                const Icon = iconPacks[link.icon as string];
                 return Icon ? (
                   <a
                     key={link._id || link.url}

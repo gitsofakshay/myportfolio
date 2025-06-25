@@ -64,8 +64,9 @@ const ResumePreview = () => {
           Download Resume
         </a>
 
+        {/* Only preview, do not force download on load */}
         <iframe
-          src={resumeUrl}
+          src={resumeUrl + (resumeUrl.includes('?') ? '&fl=inline' : '?fl=inline')}
           className="w-full h-[800px] rounded-lg mt-6 border dark:border-gray-700"
           title="Resume Preview"
         ></iframe>

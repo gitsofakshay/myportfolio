@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { FaGithub, FaExternalLinkAlt, FaStar } from "react-icons/fa";
+import { FaGithub, FaExternalLinkAlt, FaStar, FaTimes } from "react-icons/fa";
 
 interface Project {
   _id: string;
@@ -19,6 +19,8 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [modalVideo, setModalVideo] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/projects")
@@ -33,6 +35,54 @@ export default function Projects() {
         setLoading(false);
       });
   }, []);
+
+  // Handle fullscreen close
+  useEffect(() => {
+    if (!modalVideo) return;
+    const handleFullscreenChange = () => {
+      const isFullscreen =
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      // If exited fullscreen and modal is open, allow closing
+      if (!isFullscreen && modalVideo) {
+        // No-op, just allow close button to work
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, [modalVideo]);
+
+  // Helper to close modal, exiting fullscreen if needed
+  const handleCloseModal = () => {
+    const v = videoRef.current;
+    if (v) {
+      // Try to exit fullscreen on the document, not just the video
+      const isFullscreen =
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      if (isFullscreen) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
+        else if ((document as any).mozCancelFullScreen) (document as any).mozCancelFullScreen();
+        else if ((document as any).msExitFullscreen) (document as any).msExitFullscreen();
+        setTimeout(() => setModalVideo(null), 200);
+        return;
+      }
+    }
+    setModalVideo(null);
+  };
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 px-2 sm:px-6 py-10 w-full">
@@ -81,6 +131,23 @@ export default function Projects() {
                     </span>
                   ))}
                 </div>
+                {/* Video Preview (autoplay, muted, loop, no controls) */}
+                {project.video?.secure_url && (
+                  <video
+                    src={project.video.secure_url}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full rounded-md mb-2 border border-gray-200 dark:border-gray-700 max-h-64 object-cover cursor-pointer"
+                    preload="metadata"
+                    style={{ objectFit: "cover" }}
+                    onClick={() => setModalVideo(project.video!.secure_url)}
+                    title="Click to view full video"
+                  />
+                )}
+                {/* Full Video with controls (optional, can be on click/expand) */}
+                {/*
                 {project.video?.secure_url && (
                   <video
                     src={project.video.secure_url}
@@ -89,6 +156,7 @@ export default function Projects() {
                     preload="metadata"
                   />
                 )}
+                */}
                 <div className="flex gap-4 mt-2">
                   <a
                     href={project.githubLink}
@@ -109,6 +177,29 @@ export default function Projects() {
                 </div>
               </motion.div>
             ))}
+        </div>
+      )}
+      {/* Video Modal */}
+      {modalVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+          <div className="relative w-full max-w-3xl p-4">
+            <button
+              className="absolute top-4 right-4 text-white text-3xl bg-red-600 bg-opacity-90 rounded-full p-3 shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 z-50 border-2 border-white"
+              onClick={handleCloseModal}
+              aria-label="Close video"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+            >
+              <FaTimes />
+            </button>
+            <video
+              ref={videoRef}
+              src={modalVideo}
+              controls
+              autoPlay
+              className="w-full max-h-[80vh] rounded-lg border border-gray-200 dark:border-gray-700 bg-black"
+              style={{ background: "black" }}
+            />
+          </div>
         </div>
       )}
     </section>

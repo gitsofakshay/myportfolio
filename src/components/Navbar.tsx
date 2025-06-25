@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import * as FaIcons from "react-icons/fa";
+import * as MdIcons from "react-icons/md";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -29,11 +30,13 @@ export default function Navbar() {
       .then((data) => {
         if (Array.isArray(data)) {
           setSocialLinks(
-            data.filter((l) => l.isActive && l.icon && typeof (FaIcons as any)[l.icon] === "function")
+            data.filter((l) => l.isActive && l.icon && (FaIcons as any)[l.icon] || (MdIcons as any)[l.icon])
           );
         }
       });
   }, []);
+
+  const iconPacks: Record<string, React.ComponentType<any>> = { ...FaIcons, ...MdIcons };
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50">
@@ -72,7 +75,7 @@ export default function Navbar() {
         {/* Social Icons */}
         <div className="flex items-center space-x-4 text-xl">
           {socialLinks.map((link) => {
-            const Icon = (FaIcons as any)[link.icon];
+            const Icon = iconPacks[link.icon as string];
             return Icon ? (
               <a
                 key={link._id || link.url}
