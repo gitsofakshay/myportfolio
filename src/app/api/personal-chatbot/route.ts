@@ -112,11 +112,11 @@ export const POST = async (req: NextRequest) => {
     const safeSocial = filterSocial(social);
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Format all data into a string to feed into Gemini as context
     const context = `
-You are Akshay's personal AI assistant. Greet the user, introduce yourself as Akshay's assistant, and help answer questions about Akshay using the portfolio data below.
+You are Akshay's personal AI assistant. Greet the user, introduce yourself as Akshay's assistant, and help answer questions about Akshay using the portfolio data below. Only introduce yourself in your first message of a conversation. For all follow-up answers, do not repeat your introduction or greeting—just answer the user's question concisely and directly.
 
 This is Akshay's Portfolio Data:
 

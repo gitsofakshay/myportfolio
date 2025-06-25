@@ -10,29 +10,28 @@ export async function getCachedPortfolioData(): Promise<any> {
     return cachedData;
   }
 
-  async function safeFetch(url: string) {
+  async function safeFetch(url: string, expectArray: boolean = false) {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Failed to fetch ${url}`);
       return await res.json();
     } catch (e) {
       console.error(`Cache fetch error for ${url}:`, e);
-      return Array.isArray(url) ? [] : {};
+      return expectArray ? [] : {};
     }
   }
 
-  const [personal, projects, experience, education, skills, certifications, resume, social] = await Promise.all([
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/projects`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/experience`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/education`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/skills`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/certifications`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/resume`),
-    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/social-links`),
+  const [personal, projects, experience, education, skills, certifications, social] = await Promise.all([
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/profile`, false),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/projects`, true),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/experience`, true),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/education`, true),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/skills`, true),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/certifications`, true),
+    safeFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/social-links`, true),
   ]);
 
-  cachedData = { personal, projects, experience, education, skills, certifications, resume, social };
+  cachedData = { personal, projects, experience, education, skills, certifications, social };
   lastFetched = now;
 
   return cachedData;

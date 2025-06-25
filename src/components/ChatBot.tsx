@@ -177,42 +177,56 @@ export default function ChatBot() {
         >
           {/* Heading */}
           <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
-            <p className="text-sm text-[#6b7280] leading-3">
-              Powered by Gemini &amp; Vercel
-            </p>
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
+                <p className="text-sm text-[#6b7280] leading-3">
+                  Powered by Gemini &amp; Vercel
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMessages([])}
+                className="ml-2 px-3 py-1 rounded-md text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                aria-label="Clear chat"
+              >
+                Clear Chat
+              </button>
+            </div>
           </div>
           {/* Chat Container */}
           <div
-            className="pr-4 h-[474px] flex-1 overflow-y-auto"
-            style={{ minWidth: '100%', display: 'table' }}
+            className="pr-4 h-[474px] flex-1 overflow-y-auto break-words"
+            style={{ minWidth: '100%', display: 'flex', flexDirection: 'column', wordBreak: 'break-word', overflowWrap: 'break-word' }}
           >
-            {messages.length === 0 && (
-              <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
-                {aiAvatar}
-                <p className="leading-relaxed">
-                  <span className="block font-bold text-gray-700">AI </span>Hi, I
-                  am Akshay's personal AI assistant. How can I help you today?
-                </p>
-              </div>
-            )}
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex gap-3 my-4 text-gray-600 text-sm flex-1 ${
-                  msg.sender === 'user' ? 'flex-row-reverse' : ''
-                }`}
-              >
-                {msg.sender === 'user' ? userAvatar : aiAvatar}
-                <p className="leading-relaxed">
-                  <span className="block font-bold text-gray-700">
-                    {msg.sender === 'user' ? 'You' : 'AI'}{' '}
-                  </span>
-                  {msg.text}
-                </p>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
+            <div className="flex-1 flex flex-col justify-end">
+              {messages.length === 0 && (
+                <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+                  {aiAvatar}
+                  <p className="leading-relaxed">
+                    <span className="block font-bold text-gray-700">AI </span>Hi, I
+                    am Akshay's personal AI assistant. How can I help you today?
+                  </p>
+                </div>
+              )}
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex gap-3 my-4 text-gray-600 text-sm flex-1 ${
+                    msg.sender === 'user' ? 'flex-row-reverse' : ''
+                  }`}
+                >
+                  {msg.sender === 'user' ? userAvatar : aiAvatar}
+                  <p className="leading-relaxed">
+                    <span className="block font-bold text-gray-700">
+                      {msg.sender === 'user' ? 'You' : 'AI'}{' '}
+                    </span>
+                    {msg.text}
+                  </p>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
           {/* Input box  */}
           <div className="flex items-center pt-0">
