@@ -14,7 +14,7 @@ export default function AdminProfileLogout() {
     try {
       await fetch('/api/admin/logout', { method: 'POST' });
       router.push('/');
-    } catch (err) {
+    } catch {
       router.push('/');
     } finally {
       setLoading(false);

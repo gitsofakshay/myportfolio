@@ -13,20 +13,20 @@ export const config = {
   },
 };
 
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: any }> {
+async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: Record<string, unknown> | null }> {
   return new Promise((resolve, reject) => {
     const busboy = Busboy({
       headers: Object.fromEntries(req.headers.entries()),
     });
     const fields: Record<string, string> = {};
     let fileBuffer: Buffer | null = null;
-    let fileInfo: any = null;
+    let fileInfo: Record<string, unknown> | null = null;
     busboy.on('field', (name, value) => {
       fields[name] = value;
     });
     busboy.on('file', (name, file, info) => {
       const chunks: Buffer[] = [];
-      fileInfo = info;
+      fileInfo = info as unknown as Record<string, unknown>;
       file.on('data', (data: Buffer) => {
         chunks.push(data);
       });
@@ -38,7 +38,8 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
       resolve({ fields, fileBuffer, fileInfo });
     });
     busboy.on('error', reject);
-    Readable.fromWeb(req.body as any).pipe(busboy);
+    // @ts-expect-error: Node.js/Next.js stream type mismatch workaround
+    Readable.fromWeb(req.body).pipe(busboy);
   });
 }
 
@@ -53,13 +54,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (!fileName || typeof isActive === 'undefined') {
       return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
     }
-    const { id } = await params;
+    const { id } = params;
     if (!id) {
       return NextResponse.json({ error: 'Resume ID is required' }, { status: 400 });
     }
     const resume = await Resume.findById(id);
     if (!resume) return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
-    let updatedFields: any = {
+    const updatedFields: Record<string, unknown> = {
       fileName,
       isActive: isActive === 'true'
     };
@@ -77,8 +78,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Failed to update resume' }, { status: 500 });
     }
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 } 
 
@@ -86,7 +90,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const { id } = await params;
+    const { id } = params;
     if (!id) {
       return NextResponse.json({ error: 'Resume ID is required' }, { status: 400 });
     }
@@ -97,7 +101,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
     await Resume.findByIdAndDelete(id);
     return NextResponse.json({ message: 'Resume deleted' });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }

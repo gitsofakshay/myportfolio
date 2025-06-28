@@ -23,20 +23,20 @@ function validateFields(fields: Record<string, string>): string | null {
   return null;
 }
 
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: any }> {
+async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: Record<string, unknown> | null }> {
   return new Promise((resolve, reject) => {
     const busboy = Busboy({
       headers: Object.fromEntries(req.headers.entries()),
     });
     const fields: Record<string, string> = {};
     let fileBuffer: Buffer | null = null;
-    let fileInfo: any = null;
+    let fileInfo: Record<string, unknown> | null = null;
     busboy.on('field', (name, value) => {
       fields[name] = value;
     });
     busboy.on('file', (name, file, info) => {
       const chunks: Buffer[] = [];
-      fileInfo = info;
+      fileInfo = info as unknown as Record<string, unknown>;
       file.on('data', (data: Buffer) => {
         chunks.push(data);
       });
@@ -48,7 +48,8 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
       resolve({ fields, fileBuffer, fileInfo });
     });
     busboy.on('error', reject);
-    Readable.fromWeb(req.body as any).pipe(busboy);
+    // @ts-expect-error: Node.js/Next.js stream type mismatch workaround
+    Readable.fromWeb(req.body).pipe(busboy);
   });
 }
 
@@ -63,13 +64,12 @@ export async function PUT(req: NextRequest, { params }: { params: { projectId: s
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
     // Check if projectId is provided
-    const { projectId } = await params;
+    const { projectId } = params;
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
     // Find existing project
     const project = await Project.findById(projectId);
-    console.log('Project ID:', projectId);
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
@@ -112,7 +112,7 @@ export async function PUT(req: NextRequest, { params }: { params: { projectId: s
       { new: true }
     );
     return NextResponse.json(updatedProject, { status: 200 });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
   }
 }
@@ -122,7 +122,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { projectId
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const { projectId } = await params;
+    const { projectId } = params;
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
@@ -134,7 +134,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { projectId
     }
     await project.deleteOne();
     return NextResponse.json({ message: 'Project deleted' });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }

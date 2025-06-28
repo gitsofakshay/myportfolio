@@ -1,8 +1,8 @@
 // utils/cache.ts
-let cachedData: any = null;
+let cachedData: unknown = null;
 let lastFetched = 0;
 
-export async function getCachedPortfolioData(): Promise<any> {
+export async function getCachedPortfolioData(): Promise<unknown> {
   const now = Date.now();
   const cacheTTL = 60 * 5000; // 5 minutes
 
@@ -10,7 +10,7 @@ export async function getCachedPortfolioData(): Promise<any> {
     return cachedData;
   }
 
-  async function safeFetch(url: string, expectArray: boolean = false) {
+  async function safeFetch(url: string, expectArray: boolean = false): Promise<unknown> {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Failed to fetch ${url}`);

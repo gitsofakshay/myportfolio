@@ -29,8 +29,10 @@ export default function ChangePassword() {
       localStorage.setItem('resetNewPassword', newPassword);
       setAlert({ type: 'success', message: 'OTP sent to your email.' });
       setTimeout(() => router.push('/verify-otp'), 1000);
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message || 'Failed to send OTP' });
+    } catch (err: unknown) {
+      let message = 'Failed to send OTP';
+      if (err instanceof Error) message = err.message;
+      setAlert({ type: 'error', message });
     } finally {
       setLoading(false);
     }

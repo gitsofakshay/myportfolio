@@ -13,20 +13,20 @@ export const config = {
   },
 };
 
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: any }> {
+async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: Record<string, unknown> | null }> {
   return new Promise((resolve, reject) => {
     const busboy = Busboy({
       headers: Object.fromEntries(req.headers.entries()),
     });
     const fields: Record<string, string> = {};
     let fileBuffer: Buffer | null = null;
-    let fileInfo: any = null;
+    let fileInfo: Record<string, unknown> | null = null;
     busboy.on('field', (name, value) => {
       fields[name] = value;
     });
     busboy.on('file', (name, file, info) => {
       const chunks: Buffer[] = [];
-      fileInfo = info;
+      fileInfo = info as unknown as Record<string, unknown>;
       file.on('data', (data: Buffer) => {
         chunks.push(data);
       });
@@ -38,7 +38,8 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
       resolve({ fields, fileBuffer, fileInfo });
     });
     busboy.on('error', reject);
-    Readable.fromWeb(req.body as any).pipe(busboy);
+    // @ts-expect-error: Node.js/Next.js stream type mismatch workaround
+    Readable.fromWeb(req.body).pipe(busboy);
   });
 }
 
@@ -51,8 +52,11 @@ export async function GET() {
       return NextResponse.json({ error: 'No resume found' }, { status: 404 });
     }
     return NextResponse.json(resume);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -69,12 +73,15 @@ export async function POST(req: NextRequest) {
     const newResume = await Resume.create({
       fileUrl: uploadResult.url,
       publicId: uploadResult.public_id,
-      fileName: fileInfo.filename || 'Resume.pdf',
+      fileName: typeof fileInfo.filename === 'string' ? fileInfo.filename : 'Resume.pdf',
       uploadedAt: new Date(),
       isActive: true,
     });
     return NextResponse.json(newResume, { status: 201 });
-  } catch (uploadError: any) {
-    return NextResponse.json({ error: uploadError.message || 'Resume upload failed' }, { status: 500 });
+  } catch (uploadError: unknown) {
+    if (uploadError instanceof Error) {
+      return NextResponse.json({ error: uploadError.message || 'Resume upload failed' }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Resume upload failed' }, { status: 500 });
   }
 }

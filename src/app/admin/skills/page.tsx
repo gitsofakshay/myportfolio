@@ -25,7 +25,7 @@ export default function AdminSkillsPage() {
         const res = await fetch('/api/admin/skills');
         const data = await res.json();
         setSkills(Array.isArray(data) ? data : []);
-      } catch (err) {
+      } catch {
         setAlert({ type: 'error', message: 'Failed to fetch skills' });
       } finally {
         setLoading(false);

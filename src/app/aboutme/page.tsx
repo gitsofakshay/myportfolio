@@ -19,6 +19,8 @@ export default function AboutMe() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string; isActive: boolean }[]>([]);
 
   useEffect(() => {
     fetch('/api/admin/profile')
@@ -31,6 +33,20 @@ export default function AboutMe() {
       .catch(() => {
         setError('Failed to load profile');
         setLoading(false);
+      });
+    // Fetch active resume
+    fetch('/api/admin/resume')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error && data.isActive && data.fileUrl) setResumeUrl(data.fileUrl);
+      });
+    // Fetch social links
+    fetch('/api/admin/social-links')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSocialLinks(data.filter((l) => l.isActive && l.platform && l.url));
+        }
       });
   }, []);
 
@@ -95,7 +111,38 @@ export default function AboutMe() {
                   {profile.phone}
                 </span>
               </div>
-              {/* Remove resume link button since it's not in the profile model */}
+              {/* Social Links and Resume Button */}
+              <div className="flex flex-col md:flex-row gap-4 mt-8 items-center justify-center md:justify-start">
+                {/* Social Links */}
+                <div className="flex flex-wrap gap-3 text-base">
+                  {socialLinks.length > 0 ? (
+                    socialLinks.map((link) => (
+                      <a
+                        key={link.platform + link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-gray-700 dark:text-gray-200 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 transition-colors font-medium"
+                      >
+                        {link.platform}
+                      </a>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">No social links available.</span>
+                  )}
+                </div>
+                {/* Resume Link Button */}
+                {resumeUrl && (
+                  <a
+                    href={resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-base shadow"
+                  >
+                    View Resume
+                  </a>
+                )}
+              </div>
             </>
           ) : null}
         </motion.div>

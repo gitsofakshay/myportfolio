@@ -25,18 +25,18 @@ function validate(fields: Record<string, string>): string | null {
   return null;
 }
 
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: any }> {
+async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: Record<string, unknown> | null }> {
   return new Promise((resolve, reject) => {
     const busboy = Busboy({
       headers: Object.fromEntries(req.headers.entries()),
     });
     const fields: Record<string, string> = {};
     let fileBuffer: Buffer | null = null;
-    let fileInfo: any = null;
+    let fileInfo: Record<string, unknown> | null = null;
     busboy.on('field', (name, value) => {
       fields[name] = value;
     });
-    busboy.on('file', (name, file, info) => {
+    busboy.on('file', (name, file, info: Record<string, unknown>) => {
       const chunks: Buffer[] = [];
       fileInfo = info;
       file.on('data', (data: Buffer) => {
@@ -50,7 +50,8 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
       resolve({ fields, fileBuffer, fileInfo });
     });
     busboy.on('error', reject);
-    Readable.fromWeb(req.body as any).pipe(busboy);
+    // @ts-expect-error: Node.js Readable expects a web ReadableStream, but types are not fully compatible
+    Readable.fromWeb(req.body as unknown).pipe(busboy);
   });
 }
 
@@ -60,8 +61,11 @@ export async function GET() {
     await connectToDatabase();
     const list = await Certification.find().sort({ issueDate: -1 });
     return NextResponse.json(list);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -95,7 +99,10 @@ export async function POST(req: NextRequest) {
       certificateImagePublicId: certificateImagePublicId || '',
     });
     return NextResponse.json(cert, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error' }, { status: 500 });
   }
 }

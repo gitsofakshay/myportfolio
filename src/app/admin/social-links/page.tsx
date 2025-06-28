@@ -33,7 +33,7 @@ export default function AdminSocialLinksPage() {
       const res = await fetch('/api/admin/social-links');
       const data = await res.json();
       setLinks(Array.isArray(data) ? data : []);
-    } catch (error) {
+    } catch {
       setAlert({ type: 'error', message: 'Failed to fetch links.' });
     } finally {
       setLoading(false);
@@ -62,8 +62,8 @@ export default function AdminSocialLinksPage() {
       setForm(initialForm);
       setEditId(null);
       setAlert({ type: 'success', message: `Link ${editId ? 'updated' : 'added'} successfully.` });
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message || 'Failed to save link.' });
+    } catch (err) {
+      setAlert({ type: 'error', message: err instanceof Error ? err.message : 'Failed to save link.' });
     } finally {
       setLoading(false);
     }
@@ -89,8 +89,8 @@ export default function AdminSocialLinksPage() {
       if (!res.ok || data.error) throw new Error(data.error || 'Failed to delete link');
       setLinks((prev) => prev.filter((link) => link._id !== id));
       setAlert({ type: 'success', message: 'Link deleted successfully.' });
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message || 'Failed to delete link.' });
+    } catch (err: unknown) {
+      setAlert({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete link.' });
     } finally {
       setLoading(false);
     }
@@ -108,8 +108,8 @@ export default function AdminSocialLinksPage() {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Failed to update status');
       setLinks((prev) => prev.map((l) => (l._id === link._id ? { ...l, isActive: !link.isActive } : l)));
-    } catch (err: any) {
-      setAlert({ type: 'error', message: err.message || 'Failed to update status.' });
+    } catch (err: unknown) {
+      setAlert({ type: 'error', message: err instanceof Error ? err.message : 'Failed to update status.' });
     } finally {
       setLoading(false);
     }

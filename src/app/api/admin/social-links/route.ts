@@ -5,7 +5,7 @@ import SocialLink from '@/models/SocialLink';
 import { verifyAdminAuth } from '@/lib/verifyAdmin';
 
 // Utility: Validate social link fields based on model
-function validateSocialLinkFields(body: any) {
+function validateSocialLinkFields(body: Record<string, unknown>) {
   const errors: string[] = [];
 
   if (!body.platform || typeof body.platform !== 'string' || body.platform.trim() === '') {
@@ -37,8 +37,11 @@ export async function GET() {
     await connectToDatabase();
     const links = await SocialLink.find().sort({ createdAt: -1 });
     return NextResponse.json(links);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -46,7 +49,7 @@ export async function POST(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const body = await req.json(); // { platform, url, icon, isActive }
+    const body: Record<string, unknown> = await req.json(); // { platform, url, icon, isActive }
 
     // Validation
     const errors = validateSocialLinkFields(body);
@@ -55,14 +58,17 @@ export async function POST(req: NextRequest) {
     }
 
     const newLink = await SocialLink.create({
-      platform: body.platform.trim(),
-      url: body.url.trim(),
-      icon: body.icon ? body.icon.trim() : undefined,
+      platform: typeof body.platform === 'string' ? body.platform.trim() : '',
+      url: typeof body.url === 'string' ? body.url.trim() : '',
+      icon: typeof body.icon === 'string' ? body.icon.trim() : undefined,
       isActive: typeof body.isActive === 'boolean' ? body.isActive : true,
     });
 
     return NextResponse.json(newLink, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }

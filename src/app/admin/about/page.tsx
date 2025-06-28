@@ -49,7 +49,7 @@ export default function AdminAboutPage() {
             profileImage: json.profileImage || '',
           });
         }
-      } catch (err) {
+      } catch {
         setAlert({ type: 'error', message: 'Failed to load profile data' });
       }
     };
@@ -76,7 +76,7 @@ export default function AdminAboutPage() {
       } else {
         setAlert({ type: 'error', message: json.error || 'Update failed' });
       }
-    } catch (err) {
+    } catch {
       setAlert({ type: 'error', message: 'Something went wrong' });
     } finally {
       setLoading(false);
@@ -105,6 +105,7 @@ export default function AdminAboutPage() {
           <div className="flex-shrink-0">
             <div className="w-32 h-32 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
               {data.profileImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={data.profileImage} alt="Profile" className="object-cover w-full h-full" />
               ) : (
                 <span className="text-gray-400">No Image</span>

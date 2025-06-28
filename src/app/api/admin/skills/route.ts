@@ -10,8 +10,11 @@ export async function GET() {
     await connectToDatabase();
     const skills = await Skill.find().sort({ createdAt: -1 });
     return NextResponse.json(skills);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
     verifyAdminAuth();
 
     await connectToDatabase();
-    const body = await req.json(); 
+    const body: Record<string, unknown> = await req.json(); 
 
     // Validation
     const { name, level, category } = body;
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     const allowedLevels = ['Beginner', 'Intermediate', 'Expert'];
-    if (level && !allowedLevels.includes(level)) {
+    if (level && (typeof level !== 'string' || !allowedLevels.includes(level))) {
       return NextResponse.json({ error: `Level must be one of: ${allowedLevels.join(', ')}` }, { status:400 });
     }
 
@@ -40,13 +43,16 @@ export async function POST(req: NextRequest) {
     }
 
     const newSkill = await Skill.create({
-      name: name.trim(),
+      name: (name as string).trim(),
       level: level || 'Intermediate',
-      category: category ? category.trim() : undefined,
+      category: category ? (category as string).trim() : undefined,
     });
 
     return NextResponse.json(newSkill, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }

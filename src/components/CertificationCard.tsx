@@ -49,6 +49,7 @@ export default function CertificationCard({ certification }: CertificationCardPr
         ) : null}
       </p>
       {certification.certificateImage && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={certification.certificateImage}
           alt="Certificate"

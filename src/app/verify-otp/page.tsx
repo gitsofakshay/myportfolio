@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import AlertBar from "@/components/Alert";
 import FullPageLoader from "@/components/Loader";
-import { useRouter } from "next/navigation";
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState("");
@@ -16,7 +15,6 @@ export default function VerifyOTP() {
     message: string;
   } | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const router = useRouter();
 
   // On mount, get email and newPassword from localStorage
   useEffect(() => {
@@ -50,11 +48,12 @@ export default function VerifyOTP() {
       // Clean up localStorage
       localStorage.removeItem("resetEmail");
       localStorage.removeItem("resetNewPassword");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      let message = 'Failed to verify OTP or change password';
+      if (err instanceof Error) message = err.message;
       setAlert({
         type: "error",
-        message:
-          err.message || "Failed to verify OTP or change password",
+        message,
       });
     } finally {
       setLoading(false);

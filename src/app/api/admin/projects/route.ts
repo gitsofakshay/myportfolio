@@ -23,20 +23,20 @@ function validateFields(fields: Record<string, string>): string | null {
   return null;
 }
 
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: any }> {
+async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>, fileBuffer: Buffer | null, fileInfo: Record<string, unknown> | null }> {
   return new Promise((resolve, reject) => {
     const busboy = Busboy({
       headers: Object.fromEntries(req.headers.entries()),
     });
     const fields: Record<string, string> = {};
     let fileBuffer: Buffer | null = null;
-    let fileInfo: any = null;
+    let fileInfo: Record<string, unknown> | null = null;
     busboy.on('field', (name, value) => {
       fields[name] = value;
     });
     busboy.on('file', (name, file, info) => {
       const chunks: Buffer[] = [];
-      fileInfo = info;
+      fileInfo = info as unknown as Record<string, unknown>;
       file.on('data', (data: Buffer) => {
         chunks.push(data);
       });
@@ -48,7 +48,8 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
       resolve({ fields, fileBuffer, fileInfo });
     });
     busboy.on('error', reject);
-    Readable.fromWeb(req.body as any).pipe(busboy);
+    // @ts-expect-error: Node.js/Next.js stream type mismatch workaround
+    Readable.fromWeb(req.body).pipe(busboy);
   });
 }
 
@@ -58,8 +59,11 @@ export async function GET() {
     await connectToDatabase();
     const projects = await Project.find().sort({ createdAt: -1 });
     return NextResponse.json(projects);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -79,7 +83,6 @@ export async function POST(req: NextRequest) {
     }
     const uploadResult = await uploadToCloudinary(fileBuffer, 'portfolio/videos', 'video');
     if (!uploadResult || !uploadResult.url || !uploadResult.public_id) {
-      console.error('Cloudinary upload failed:', uploadResult);
       return NextResponse.json({ error: 'Failed to upload video' }, { status: 500 });
     }
     let techStackArr: string[] = [];
@@ -104,8 +107,7 @@ export async function POST(req: NextRequest) {
       isFeatured: fields.isFeatured === 'true',
     });
     return NextResponse.json(newProject, { status: 201 });
-  } catch (err: any) {
-    console.error('Failed to save project:', err);
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

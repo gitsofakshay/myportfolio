@@ -2,82 +2,132 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getCachedPortfolioData } from "@/utils/cache";
 
-function filterPersonal(personal: any) {
-  if (!personal) return {};
-  const { fullName, title, bio, location, profileImage } = personal;
+interface PersonalInfo {
+  fullName?: string;
+  title?: string;
+  bio?: string;
+  location?: string;
+  profileImage?: string;
+}
+interface Experience {
+  title?: string;
+  company?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  description?: string;
+  currentlyWorking?: boolean;
+}
+interface Education {
+  institution?: string;
+  degree?: string;
+  fieldOfStudy?: string;
+  startDate?: string;
+  endDate?: string;
+  gradeOrPercentage?: string;
+  location?: string;
+  description?: string;
+}
+interface Skill {
+  name?: string;
+  level?: string;
+  category?: string;
+}
+interface Project {
+  title?: string;
+  description?: string;
+  techStack?: string[];
+  githubLink?: string;
+  liveLink?: string;
+  isFeatured?: boolean;
+}
+interface Certification {
+  name?: string;
+  issuingOrganization?: string;
+  issueDate?: string;
+  expirationDate?: string;
+  credentialUrl?: string;
+}
+interface ResumeFile {
+  fileUrl?: string;
+  fileName?: string;
+  uploadedAt?: string;
+  isActive?: boolean;
+}
+interface SocialLink {
+  platform?: string;
+  url?: string;
+  icon?: string;
+  isActive?: boolean;
+}
+
+function filterPersonal(personal: unknown): PersonalInfo {
+  if (!personal || typeof personal !== 'object') return {};
+  const { fullName, title, bio, location, profileImage } = personal as PersonalInfo;
   return { fullName, title, bio, location, profileImage };
 }
 
-function filterExperience(experience: any[]) {
-  return (experience || []).map((exp) => ({
-    title: exp.title,
-    company: exp.company,
-    startDate: exp.startDate,
-    endDate: exp.endDate,
-    location: exp.location,
-    description: exp.description,
-    currentlyWorking: exp.currentlyWorking,
-  }));
+function filterExperience(experience: unknown): Experience[] {
+  if (!Array.isArray(experience)) return [];
+  return experience.map((exp) => {
+    if (typeof exp !== 'object' || !exp) return {};
+    const { title, company, startDate, endDate, location, description, currentlyWorking } = exp as Experience;
+    return { title, company, startDate, endDate, location, description, currentlyWorking };
+  });
 }
 
-function filterEducation(education: any[]) {
-  return (education || []).map((edu) => ({
-    institution: edu.institution,
-    degree: edu.degree,
-    fieldOfStudy: edu.fieldOfStudy,
-    startDate: edu.startDate,
-    endDate: edu.endDate,
-    gradeOrPercentage: edu.gradeOrPercentage,
-    location: edu.location,
-    description: edu.description,
-  }));
+function filterEducation(education: unknown): Education[] {
+  if (!Array.isArray(education)) return [];
+  return education.map((edu) => {
+    if (typeof edu !== 'object' || !edu) return {};
+    const { institution, degree, fieldOfStudy, startDate, endDate, gradeOrPercentage, location, description } = edu as Education;
+    return { institution, degree, fieldOfStudy, startDate, endDate, gradeOrPercentage, location, description };
+  });
 }
 
-function filterSkills(skills: any[]) {
-  return (skills || []).map((skill) => ({
-    name: skill.name,
-    level: skill.level,
-    category: skill.category,
-  }));
+function filterSkills(skills: unknown): Skill[] {
+  if (!Array.isArray(skills)) return [];
+  return skills.map((skill) => {
+    if (typeof skill !== 'object' || !skill) return {};
+    const { name, level, category } = skill as Skill;
+    return { name, level, category };
+  });
 }
 
-function filterProjects(projects: any[]) {
-  return (projects || []).map((proj) => ({
-    title: proj.title,
-    description: proj.description,
-    techStack: proj.techStack,
-    githubLink: proj.githubLink,
-    liveLink: proj.liveLink,
-    isFeatured: proj.isFeatured,
-  }));
+function filterProjects(projects: unknown): Project[] {
+  if (!Array.isArray(projects)) return [];
+  return projects.map((proj) => {
+    if (typeof proj !== 'object' || !proj) return {};
+    const { title, description, techStack, githubLink, liveLink, isFeatured } = proj as Project;
+    return { title, description, techStack, githubLink, liveLink, isFeatured };
+  });
 }
 
-function filterCertifications(certifications: any[]) {
-  return (certifications || []).map((cert) => ({
-    name: cert.name,
-    issuingOrganization: cert.issuingOrganization,
-    issueDate: cert.issueDate,
-    expirationDate: cert.expirationDate,
-    credentialUrl: cert.credentialUrl,
-  }));
+function filterCertifications(certifications: unknown): Certification[] {
+  if (!Array.isArray(certifications)) return [];
+  return certifications.map((cert) => {
+    if (typeof cert !== 'object' || !cert) return {};
+    const { name, issuingOrganization, issueDate, expirationDate, credentialUrl } = cert as Certification;
+    return { name, issuingOrganization, issueDate, expirationDate, credentialUrl };
+  });
 }
 
-function filterResume(resume: any[]) {
-  return (resume || []).map((r) => ({
-    fileUrl: r.fileUrl,
-    fileName: r.fileName,
-    uploadedAt: r.uploadedAt,
-    isActive: r.isActive,
-  }));
+function filterResume(resume: unknown): ResumeFile[] {
+  if (!Array.isArray(resume)) return [];
+  return resume.map((r) => {
+    if (typeof r !== 'object' || !r) return {};
+    const { fileUrl, fileName, uploadedAt, isActive } = r as ResumeFile;
+    return { fileUrl, fileName, uploadedAt, isActive };
+  });
 }
 
-function filterSocial(social: any[]) {
-  return (social || []).map((link) => ({
-    platform: link.platform,
-    url: link.url,
-    icon: link.icon,
-    isActive: link.isActive,
-  }));
+function filterSocial(social: unknown): SocialLink[] {
+  if (!Array.isArray(social)) return [];
+  return social.map((link) => {
+    if (typeof link !== 'object' || !link) return {};
+    const { platform, url, icon, isActive } = link as SocialLink;
+    return { platform, url, icon, isActive };
+  });
 }
 
 export const POST = async (req: NextRequest) => {
@@ -99,7 +149,7 @@ export const POST = async (req: NextRequest) => {
       certifications = [],
       resume = [],
       social = [],
-    } = await getCachedPortfolioData();
+    } = (await getCachedPortfolioData()) as Record<string, unknown>;
 
     // Filter all data to exclude sensitive/private fields
     const safePersonal = filterPersonal(personal);
@@ -126,32 +176,32 @@ ${JSON.stringify(safePersonal)}
 Experience:
 ${safeExperience
   .map(
-    (exp: any) =>
+    (exp) =>
       `- ${exp.title} at ${exp.company} (${exp.startDate} to ${exp.endDate})`
   )
   .join("\n")}
 
 Education:
 ${safeEducation
-  .map((edu: any) => `- ${edu.degree} from ${edu.institution} (${edu.startDate})`)
+  .map((edu) => `- ${edu.degree} from ${edu.institution} (${edu.startDate})`)
   .join("\n")}
 
 Skills:
-${safeSkills.map((skill: any) => skill.name).join(", ")}
+${safeSkills.map((skill) => skill.name).join(", ")}
 
 Projects:
-${safeProjects.map((proj: any) => `- ${proj.title}: ${proj.description}`).join("\n")}
+${safeProjects.map((proj) => `- ${proj.title}: ${proj.description}`).join("\n")}
 
 Certifications:
 ${safeCertifications
-  .map((cert: any) => `- ${cert.name} from ${cert.issuingOrganization}`)
+  .map((cert) => `- ${cert.name} from ${cert.issuingOrganization}`)
   .join("\n")}
 
 Resume File:
 ${safeResume.length ? safeResume[0].fileUrl : "No resume uploaded."}
 
 Social Links:
-${safeSocial.map((link: any) => `${link.platform}: ${link.url}`).join("\n")}
+${safeSocial.map((link) => `${link.platform}: ${link.url}`).join("\n")}
 
 ---
 Now respond to this user query based on this data only:

@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useState } from "react";
 import { FaDownload, FaFilePdf, FaExclamationTriangle } from "react-icons/fa";
 

@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const response = NextResponse.json({ message: 'Login successful' });
     response.headers.set('Set-Cookie', cookie);
     return response;
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

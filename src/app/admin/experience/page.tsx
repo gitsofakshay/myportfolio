@@ -41,7 +41,7 @@ export default function AdminExperiencePage() {
         const res = await fetch('/api/admin/experience');
         const data = await res.json();
         setExperiences(Array.isArray(data) ? data : []);
-      } catch (err) {
+      } catch {
         setAlert({ type: 'error', message: 'Failed to load experiences' });
       } finally {
         setLoading(false);

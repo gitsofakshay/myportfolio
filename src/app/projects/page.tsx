@@ -42,9 +42,9 @@ export default function Projects() {
     const handleFullscreenChange = () => {
       const isFullscreen =
         document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement;
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        (document as unknown as { mozFullScreenElement?: Element }).mozFullScreenElement ||
+        (document as unknown as { msFullscreenElement?: Element }).msFullscreenElement;
       // If exited fullscreen and modal is open, allow closing
       if (!isFullscreen && modalVideo) {
         // No-op, just allow close button to work
@@ -69,14 +69,14 @@ export default function Projects() {
       // Try to exit fullscreen on the document, not just the video
       const isFullscreen =
         document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement;
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        (document as unknown as { mozFullScreenElement?: Element }).mozFullScreenElement ||
+        (document as unknown as { msFullscreenElement?: Element }).msFullscreenElement;
       if (isFullscreen) {
         if (document.exitFullscreen) document.exitFullscreen();
-        else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
-        else if ((document as any).mozCancelFullScreen) (document as any).mozCancelFullScreen();
-        else if ((document as any).msExitFullscreen) (document as any).msExitFullscreen();
+        else if ((document as unknown as { webkitExitFullscreen?: () => void }).webkitExitFullscreen) (document as unknown as { webkitExitFullscreen?: () => void }).webkitExitFullscreen!();
+        else if ((document as unknown as { mozCancelFullScreen?: () => void }).mozCancelFullScreen) (document as unknown as { mozCancelFullScreen?: () => void }).mozCancelFullScreen!();
+        else if ((document as unknown as { msExitFullscreen?: () => void }).msExitFullscreen) (document as unknown as { msExitFullscreen?: () => void }).msExitFullscreen!();
         setTimeout(() => setModalVideo(null), 200);
         return;
       }

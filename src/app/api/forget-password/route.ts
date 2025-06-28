@@ -11,10 +11,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized. No token found.' }, { status: 401 });
   }
 
-  let decoded: any;
+  let decoded: Record<string, unknown> | null;
   try {
-    decoded = verifyJwt(token); // Will throw if token is invalid 
-  } catch (err) {
+    const result = verifyJwt(token);
+    if (!result || typeof result === 'string') {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+    decoded = result as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+  }
+
+  if (!decoded || typeof decoded.id !== 'string') {
     return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
   }
 

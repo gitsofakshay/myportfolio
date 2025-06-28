@@ -39,8 +39,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true , message: "Your message send to akshay raj successfully!" }, { status: 200 });
-  } catch (error: any) {
-    console.error("Mailgun error:", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Mailgun error:", error);
+    }
     return NextResponse.json(
       { success: false, error: "Email sending failed" },
       { status: 500 }

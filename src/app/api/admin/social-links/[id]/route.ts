@@ -6,7 +6,7 @@ import { verifyAdminAuth } from '@/lib/verifyAdmin';
 import mongoose from 'mongoose';
 
 // Utility: Validate social link fields based on model
-function validateSocialLinkFields(body: any) {
+function validateSocialLinkFields(body: Record<string, unknown>) {
   const errors: string[] = [];
 
   if ('platform' in body) {
@@ -44,25 +44,28 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = await params;
+    const {id} = params;
     if (!id || !isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid or missing SocialLink ID.' }, { status: 400 });
     }
-    const body = await req.json();
+    const body: Record<string, unknown> = await req.json();
     const errors = validateSocialLinkFields(body);
     if (errors.length > 0) {
       return NextResponse.json({ error: errors.join(' ') }, { status: 400 });
     }
-    const updateData: any = {};
-    if ('platform' in body) updateData.platform = body.platform.trim();
-    if ('url' in body) updateData.url = body.url.trim();
-    if ('icon' in body) updateData.icon = body.icon ? body.icon.trim() : undefined;
-    if ('isActive' in body) updateData.isActive = body.isActive;
+    const updateData: Record<string, unknown> = {};
+    if ('platform' in body && typeof body.platform === 'string') updateData.platform = body.platform.trim();
+    if ('url' in body && typeof body.url === 'string') updateData.url = body.url.trim();
+    if ('icon' in body && typeof body.icon === 'string') updateData.icon = body.icon ? body.icon.trim() : undefined;
+    if ('isActive' in body && typeof body.isActive === 'boolean') updateData.isActive = body.isActive;
     const updated = await SocialLink.findByIdAndUpdate(id, updateData, { new: true });
     if (!updated) return NextResponse.json({ error: 'Link not found' }, { status: 404 });
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -70,14 +73,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = await params;
+    const {id} = params;
     if (!id || !isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid or missing SocialLink ID.' }, { status: 400 });
     }
     const deleted = await SocialLink.findByIdAndDelete(id);
     if (!deleted) return NextResponse.json({ error: 'Link not found' }, { status: 404 });
     return NextResponse.json({ message: 'Link deleted' });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }

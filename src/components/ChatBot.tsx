@@ -53,7 +53,7 @@ export default function ChatBot() {
         ...prev,
         { sender: 'bot', text: data.reply || data.error || 'No reply.' },
       ]);
-    } catch (error) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { sender: 'bot', text: 'Error fetching reply.' },
@@ -88,6 +88,7 @@ export default function ChatBot() {
   // SVGs for avatars
   const aiAvatar = profilePic ? (
     <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={profilePic}
         alt="AI Avatar"
@@ -205,7 +206,7 @@ export default function ChatBot() {
                   {aiAvatar}
                   <p className="leading-relaxed">
                     <span className="block font-bold text-gray-700">AI </span>Hi, I
-                    am Akshay's personal AI assistant. How can I help you today?
+                    am Akshay&apos;s personal AI assistant. How can I help you today?
                   </p>
                 </div>
               )}

@@ -208,6 +208,7 @@ export default function AdminCertificationsPage() {
           />
           <FiUpload className="text-blue-500" />
           {form.certificateImage && !imageFile && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={form.certificateImage} alt="Certificate" className="w-16 h-16 object-contain rounded border ml-2" />
           )}
         </div>
@@ -235,6 +236,7 @@ export default function AdminCertificationsPage() {
           <li key={cert._id} className="border p-4 rounded shadow flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 dark:bg-gray-700">
             <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
               {cert.certificateImage && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={cert.certificateImage} alt="Certificate" className="w-20 h-20 object-contain rounded border" />
               )}
               <div>

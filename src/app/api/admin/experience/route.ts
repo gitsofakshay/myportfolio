@@ -5,7 +5,7 @@ import Experience from '@/models/Experience';
 import { verifyAdminAuth } from '@/lib/verifyAdmin';
 
 // Validation utility for Experience
-export function validateExperienceFields(body: any): string[] {
+export function validateExperienceFields(body: Record<string, unknown>): string[] {
   const errors: string[] = [];
 
   if (!body.title || typeof body.title !== 'string' || body.title.trim() === '') {
@@ -14,10 +14,10 @@ export function validateExperienceFields(body: any): string[] {
   if (!body.company || typeof body.company !== 'string' || body.company.trim() === '') {
     errors.push('Company is required and must be a non-empty string.');
   }
-  if (!body.startDate || isNaN(Date.parse(body.startDate))) {
+  if (!body.startDate || typeof body.startDate !== 'string' || isNaN(Date.parse(body.startDate))) {
     errors.push('startDate is required and must be a valid date.');
   }
-  if ('endDate' in body && body.endDate && isNaN(Date.parse(body.endDate))) {
+  if ('endDate' in body && body.endDate && (typeof body.endDate !== 'string' || isNaN(Date.parse(body.endDate)))) {
     errors.push('endDate must be a valid date if provided.');
   }
   if ('currentlyWorking' in body && typeof body.currentlyWorking !== 'boolean') {
@@ -27,7 +27,7 @@ export function validateExperienceFields(body: any): string[] {
     errors.push('location must be a string.');
   }
   if ('description' in body && body.description !== undefined && body.description !== null) {
-    if (!Array.isArray(body.description) || !body.description.every((item: any) => typeof item === 'string')) {
+    if (!Array.isArray(body.description) || !body.description.every((item) => typeof item === 'string')) {
       errors.push('description must be an array of strings.');
     }
   }
@@ -40,8 +40,11 @@ export async function GET() {
     await connectToDatabase();
     const experienceList = await Experience.find().sort({ startDate: -1 });
     return NextResponse.json(experienceList);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
 
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
     verifyAdminAuth();
 
     await connectToDatabase();
-    const body = await req.json(); 
+    const body: Record<string, unknown> = await req.json();
 
     // Validation
     const errors = validateExperienceFields(body);
@@ -60,19 +63,22 @@ export async function POST(req: NextRequest) {
     }
 
     const newExperience = await Experience.create({
-      title: body.title.trim(),
-      company: body.company.trim(),
-      location: body.location && body.location.trim() !== '' ? body.location.trim() : undefined,
-      startDate: new Date(body.startDate),
-      endDate: body.endDate ? new Date(body.endDate) : undefined,
+      title: typeof body.title === 'string' ? body.title.trim() : '',
+      company: typeof body.company === 'string' ? body.company.trim() : '',
+      location: typeof body.location === 'string' && body.location.trim() !== '' ? body.location.trim() : undefined,
+      startDate: typeof body.startDate === 'string' ? new Date(body.startDate) : undefined,
+      endDate: typeof body.endDate === 'string' ? new Date(body.endDate) : undefined,
       currentlyWorking: typeof body.currentlyWorking === 'boolean' ? body.currentlyWorking : false,
       description: Array.isArray(body.description) && body.description.length > 0
-        ? body.description.map((d: string) => d.trim()).filter(Boolean)
+        ? body.description.map((d) => typeof d === 'string' ? d.trim() : '').filter(Boolean)
         : undefined,
     });
 
     return NextResponse.json(newExperience, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
