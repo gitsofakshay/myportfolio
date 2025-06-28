@@ -55,7 +55,7 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
   });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   verifyAdminAuth();
   await connectToDatabase();
   try {
@@ -64,7 +64,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (errorMessage) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
-    const id = params.id;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id) {
       return NextResponse.json({ error: 'Certification ID is required' }, { status: 400 });
     }
@@ -102,16 +104,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const id = params.id;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id) {
       return NextResponse.json({ error: 'Certification ID is required' }, { status: 400 });
     }
     const certificate = await Certification.findById(id);
-    if (!certificate) return NextResponse.json({ error: 'Certificate not found' }, { status: 404 });
+    if (!certificate) return NextResponse.json({ error: 'Certification not found' }, { status: 404 });
     if (certificate.certificateImagePublicId) {
       await deleteFromCloudinary(certificate.certificateImagePublicId, 'image');
     }

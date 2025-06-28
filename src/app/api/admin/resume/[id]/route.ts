@@ -43,18 +43,19 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
   });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   verifyAdminAuth();
   await connectToDatabase();
-
   try {
     const { fields, fileBuffer, fileInfo } = await parseFormData(req);
     const fileName = fields.fileName;
     const isActive = fields.isActive;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!fileName || typeof isActive === 'undefined') {
       return NextResponse.json({ error: 'Required fields are missing' }, { status: 400 });
     }
-    const { id } = params;
     if (!id) {
       return NextResponse.json({ error: 'Resume ID is required' }, { status: 400 });
     }
@@ -84,13 +85,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
     return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
-} 
+}
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const { id } = params;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id) {
       return NextResponse.json({ error: 'Resume ID is required' }, { status: 400 });
     }

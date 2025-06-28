@@ -40,11 +40,13 @@ function isValidObjectId(id: string) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = params;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id || !isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid or missing SocialLink ID.' }, { status: 400 });
     }
@@ -69,11 +71,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = params;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id || !isValidObjectId(id)) {
       return NextResponse.json({ error: 'Invalid or missing SocialLink ID.' }, { status: 400 });
     }

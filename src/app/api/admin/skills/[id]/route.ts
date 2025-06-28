@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/dbConfig/db';
 import Skill from '@/models/Skills';
 import { verifyAdminAuth } from '@/lib/verifyAdmin';
-import mongoose from 'mongoose';
 
 // Utility: Validate skill fields based on model
 function validateSkillFields(body: Record<string, unknown>) {
@@ -28,17 +27,15 @@ function validateSkillFields(body: Record<string, unknown>) {
   return errors;
 }
 
-function isValidObjectId(id: string) {
-  return mongoose.Types.ObjectId.isValid(id);
-}
-
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = params;
-    if (!id || !isValidObjectId(id)) {
-      return NextResponse.json({ error: 'Invalid or missing Skill ID.' }, { status: 400 });
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
+    if (!id) {
+      return NextResponse.json({ error: 'Skill ID is required' }, { status: 400 });
     }
     const body: Record<string, unknown> = await req.json();
     const errors = validateSkillFields(body);
@@ -46,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: errors.join(' ') }, { status: 400 });
     }
 
-    // Clean up fields 
+    // Clean up fields
     const updateData: Record<string, unknown> = {};
     if ('name' in body && typeof body.name === 'string') updateData.name = body.name.trim();
     if ('level' in body && typeof body.level === 'string') updateData.level = body.level;
@@ -63,13 +60,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = params;
-    if (!id || !isValidObjectId(id)) {
-      return NextResponse.json({ error: 'Invalid or missing Skill ID.' }, { status: 400 });
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
+    if (!id) {
+      return NextResponse.json({ error: 'Skill ID is required' }, { status: 400 });
     }
     const deleted = await Skill.findByIdAndDelete(id);
     if (!deleted) return NextResponse.json({ error: 'Skill not found' }, { status: 404 });

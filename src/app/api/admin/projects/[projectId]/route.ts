@@ -53,18 +53,18 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
   });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { projectId: string } }) {
+export async function PUT(req: NextRequest) {
   verifyAdminAuth();
   await connectToDatabase();
-
   try {
     const { fields, fileBuffer } = await parseFormData(req);
     const validationError = validateFields(fields);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
-    // Check if projectId is provided
-    const { projectId } = params;
+    // Extract projectId from URL
+    const url = new URL(req.url);
+    const projectId = url.pathname.split('/').pop();
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
@@ -118,11 +118,13 @@ export async function PUT(req: NextRequest, { params }: { params: { projectId: s
 }
 
 //Route to delete project
-export async function DELETE(req: NextRequest, { params }: { params: { projectId: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const { projectId } = params;
+    // Extract projectId from URL
+    const url = new URL(req.url);
+    const projectId = url.pathname.split('/').pop();
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }

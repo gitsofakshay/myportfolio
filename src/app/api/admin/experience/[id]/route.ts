@@ -3,24 +3,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/dbConfig/db';
 import Experience from '@/models/Experience';
 import { verifyAdminAuth } from '@/lib/verifyAdmin';
-import { validateExperienceFields } from '../route'; 
+import { validateExperienceFields } from '../validate';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   try {
     verifyAdminAuth();
-
     await connectToDatabase();
     const body: Record<string, unknown> = await req.json();
-
-    // Validation 
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
+    if (!id) {
+      return NextResponse.json({ error: 'Experience ID is required' }, { status: 400 });
+    }
+    // Validation
     const errors = validateExperienceFields(body);
     if (errors.length > 0) {
       return NextResponse.json({ error: errors.join(' ') }, { status: 400 });
-    }
-    const {id} = params;
-
-    if (!id) {
-      return NextResponse.json({ error: 'Experience ID is required' }, { status: 400 });
     }
     // Prepare update data
     const updateData: Record<string, unknown> = {};
@@ -34,7 +33,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       updateData.description = body.description.map((d) => typeof d === 'string' ? d.trim() : '').filter(Boolean);
       if ((updateData.description as string[]).length === 0) updateData.description = undefined;
     }
-
     const updated = await Experience.findByIdAndUpdate(id, updateData, { new: true });
     if (!updated) return NextResponse.json({ error: 'Experience not found' }, { status: 404 });
     return NextResponse.json(updated);
@@ -46,11 +44,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     verifyAdminAuth();
     await connectToDatabase();
-    const {id} = params;
+    // Extract id from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
     if (!id) {
       return NextResponse.json({ error: 'Experience ID is required' }, { status: 400 });
     }
