@@ -116,56 +116,60 @@ export default function AdminSocialLinksPage() {
   };
 
   return (
-    <div className="max-w-2xl w-full min-h-[60vh] mx-auto bg-white dark:bg-gray-800 p-6 md:p-10 rounded-xl shadow-md mt-8 flex flex-col gap-8">
-      <h1 className="text-2xl font-bold mb-6">Manage Social Links</h1>
+    <div className="max-w-2xl w-full min-h-[60vh] mx-auto bg-white dark:bg-gray-800 p-4 sm:p-6 md:p-10 rounded-xl shadow-md mt-8 flex flex-col gap-8">
+      <h1 className="text-2xl font-bold mb-6 text-center sm:text-left">Manage Social Links</h1>
       {alert && <AlertBar type={alert.type} message={alert.message} />}
       {loading && <FullPageLoader />}
-      <form onSubmit={handleSubmit} className="space-y-4 mb-8 flex flex-col md:flex-row md:items-end gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Platform"
-            value={form.platform}
-            onChange={(e) => setForm({ ...form, platform: e.target.value })}
-            className="w-full border p-2 rounded"
-            required
-          />
+      <form onSubmit={handleSubmit} className="space-y-4 mb-8 flex flex-col gap-4 w-full">
+        <div className="flex flex-col md:flex-row md:items-end gap-4 w-full">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Platform"
+              value={form.platform}
+              onChange={(e) => setForm({ ...form, platform: e.target.value })}
+              className="w-full border p-2 rounded"
+              required
+            />
+          </div>
+          <div className="flex-1">
+            <input
+              type="url"
+              placeholder="URL"
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
+              className="w-full border p-2 rounded"
+              required
+            />
+          </div>
         </div>
-        <div className="flex-1">
-          <input
-            type="url"
-            placeholder="URL"
-            value={form.url}
-            onChange={(e) => setForm({ ...form, url: e.target.value })}
-            className="w-full border p-2 rounded"
-            required
-          />
+        <div className="flex flex-col md:flex-row md:items-end gap-4 w-full">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Icon (optional)"
+              value={form.icon || ''}
+              onChange={(e) => setForm({ ...form, icon: e.target.value })}
+              className="w-full border p-2 rounded"
+            />
+          </div>
+          <div className="flex items-center gap-2 mt-2 md:mt-0">
+            <label className="text-sm">Active</label>
+            <button
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, isActive: !prev.isActive }))}
+              className="text-xl"
+              title={form.isActive ? 'Deactivate' : 'Activate'}
+            >
+              {form.isActive ? <FiToggleRight className="text-green-500" /> : <FiToggleLeft className="text-gray-400" />}
+            </button>
+          </div>
         </div>
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Icon (optional)"
-            value={form.icon || ''}
-            onChange={(e) => setForm({ ...form, icon: e.target.value })}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Active</label>
-          <button
-            type="button"
-            onClick={() => setForm((prev) => ({ ...prev, isActive: !prev.isActive }))}
-            className="text-xl"
-            title={form.isActive ? 'Deactivate' : 'Activate'}
-          >
-            {form.isActive ? <FiToggleRight className="text-green-500" /> : <FiToggleLeft className="text-gray-400" />}
-          </button>
-        </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             {editId ? <FiCheck /> : <FiCheck />} {editId ? 'Update' : 'Add'}
           </button>
@@ -173,7 +177,7 @@ export default function AdminSocialLinksPage() {
             <button
               type="button"
               onClick={handleCancel}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 flex items-center gap-2"
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 flex items-center gap-2 w-full sm:w-auto justify-center"
             >
               <FiX /> Cancel
             </button>
@@ -182,18 +186,18 @@ export default function AdminSocialLinksPage() {
       </form>
       <ul className="space-y-3">
         {links.map((link) => (
-          <li key={link._id} className="flex justify-between items-center border p-2 rounded bg-gray-50 dark:bg-gray-700">
-            <div className="flex flex-col gap-1">
+          <li key={link._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center border p-2 rounded bg-gray-50 dark:bg-gray-700 gap-2">
+            <div className="flex flex-col gap-1 w-full">
               <span className="font-medium flex items-center gap-2">
                 <FiLink /> {link.platform}
                 {link.isActive ? <FiToggleRight className="text-green-500 ml-2" title="Active" /> : <FiToggleLeft className="text-gray-400 ml-2" title="Inactive" />}
               </span>
-              <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 flex items-center gap-1">
+              <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 flex items-center gap-1 break-all">
                 <FiEye /> {link.url}
               </a>
               {link.icon && <span className="text-xs text-gray-500">Icon: {link.icon}</span>}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => handleEdit(link)}
                 className="text-blue-600 hover:text-blue-800 p-1 rounded"

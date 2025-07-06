@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FiMenu, FiUser, FiFolder, FiAward, FiBook, FiBriefcase, FiFileText, FiLink, FiLogOut } from "react-icons/fi";
 
 const navLinks = [
@@ -19,6 +19,7 @@ const navLinks = [
 export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (href: string) => pathname === href;
 
@@ -26,6 +27,16 @@ export default function AdminSidebar() {
     "bg-blue-900 text-blue-100 dark:bg-blue-900 dark:text-blue-100 font-semibold shadow-inner";
   const baseClass =
     "flex items-center gap-3 px-2 py-2 rounded hover:bg-blue-50 dark:hover:bg-gray-700 transition";
+
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      router.push('/');
+    } catch {
+      router.push('/');
+    }
+  };
 
   return (
     <>
@@ -57,7 +68,7 @@ export default function AdminSidebar() {
             ))}
           </nav>
         </div>
-        <form action="/api/logout" method="POST">
+        <form onSubmit={handleLogout}>
           <button
             type="submit"
             className="mt-10 w-full flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
@@ -89,7 +100,7 @@ export default function AdminSidebar() {
                 ))}
               </nav>
             </div>
-            <form action="/api/logout" method="POST">
+            <form onSubmit={handleLogout}>
               <button
                 type="submit"
                 className="mt-10 w-full flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"

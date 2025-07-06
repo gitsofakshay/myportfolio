@@ -162,96 +162,84 @@ export default function AdminProjectsPage() {
   };
 
   return (
-    <div className="max-w-6xl w-full min-h-[80vh] mx-auto bg-white dark:bg-gray-800 p-6 md:p-10 rounded-xl shadow-md mt-8 flex flex-col gap-10">
-      <h1 className="text-2xl font-bold mb-6">{editId ? "Edit Project" : "Add New Project"}</h1>
+    <div className="max-w-3xl w-full min-h-[60vh] mx-auto bg-white dark:bg-gray-800 p-4 sm:p-6 md:p-10 rounded-xl shadow-md mt-8 flex flex-col gap-8">
+      <h1 className="text-2xl font-bold mb-6 text-center sm:text-left">{editId ? "Edit Project" : "Add New Project"}</h1>
       {alert && <AlertBar type={alert.type} message={alert.message} />}
       {loading && <FullPageLoader />}
-      <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-medium mb-1">Project Title</label>
+      <form onSubmit={handleSubmit} className="space-y-4 mb-8 flex flex-col gap-4" encType="multipart/form-data">
+        <input
+          type="text"
+          name="title"
+          placeholder="Project Title"
+          value={form.title}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
+        <input
+          type="text"
+          name="techStack"
+          placeholder="Tech Stack (comma-separated)"
+          value={form.techStack}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
+        <input
+          type="url"
+          name="githubLink"
+          placeholder="GitHub Link"
+          value={form.githubLink}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
+        <input
+          type="url"
+          name="liveLink"
+          placeholder="Live Link"
+          value={form.liveLink}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Project Description"
+          value={form.description}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          rows={3}
+          required
+        />
+        <div className="flex flex-col md:flex-row gap-4 items-center w-full">
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <label className="block font-medium mb-1">Project Video</label>
             <input
-              type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
+              type="file"
+              accept="video/*"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
+            <FiUpload className="text-blue-500" />
           </div>
-          <div>
-            <label className="block font-medium mb-1">Tech Stack (comma-separated)</label>
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <input
-              type="text"
-              name="techStack"
-              value={form.techStack}
+              type="checkbox"
+              name="isFeatured"
+              checked={form.isFeatured}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
+              className="w-4 h-4"
             />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">GitHub Link</label>
-            <input
-              type="url"
-              name="githubLink"
-              value={form.githubLink}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Live Link</label>
-            <input
-              type="url"
-              name="liveLink"
-              value={form.liveLink}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block font-medium mb-1">Project Description</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              rows={3}
-              required
-            />
-          </div>
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex items-center gap-2">
-              <label className="block font-medium mb-1">Project Video</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-                className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              <FiUpload className="text-blue-500" />
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="isFeatured"
-                checked={form.isFeatured}
-                onChange={handleChange}
-                className="w-4 h-4"
-              />
-              <label>Mark as Featured</label>
-            </div>
+            <label>Mark as Featured</label>
           </div>
         </div>
         <div className="flex gap-4">
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             {editId ? <FiEdit /> : <FiUpload />} {editId ? "Update Project" : "Save Project"}
           </button>
@@ -259,34 +247,33 @@ export default function AdminProjectsPage() {
             <button
               type="button"
               onClick={resetForm}
-              className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 flex items-center gap-2"
+              className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 flex items-center gap-2 w-full sm:w-auto justify-center"
             >
               Cancel
             </button>
           )}
         </div>
       </form>
-
       {/* Project List */}
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4">All Projects</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="mt-8 w-full">
+        <h2 className="text-xl font-semibold mb-4 text-center sm:text-left">All Projects</h2>
+        <div className="overflow-x-auto w-full">
+          <table className="min-w-[500px] w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
             <thead>
               <tr className="bg-gray-100 dark:bg-gray-700">
-                <th className="px-4 py-2 text-left">Title</th>
-                <th className="px-4 py-2 text-left">Tech Stack</th>
-                <th className="px-4 py-2 text-left">Links</th>
-                <th className="px-4 py-2 text-left">Video</th>
-                <th className="px-4 py-2 text-left">Featured</th>
-                <th className="px-4 py-2 text-left">Actions</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Title</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Tech Stack</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Links</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Video</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Featured</th>
+                <th className="px-2 sm:px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               {projects.map((proj) => (
                 <tr key={proj._id} className="border-b dark:border-gray-700">
-                  <td className="px-4 py-2 font-medium">{proj.title}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-2 sm:px-4 py-2 font-medium break-words max-w-[120px] align-top">{proj.title}</td>
+                  <td className="px-2 sm:px-4 py-2 align-top">
                     <div className="flex flex-wrap gap-1">
                       {proj.techStack.map((tech, idx) => (
                         <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">
@@ -295,7 +282,7 @@ export default function AdminProjectsPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-2 flex gap-2">
+                  <td className="px-2 sm:px-4 py-2 flex flex-wrap gap-2 align-top">
                     <a href={proj.githubLink} target="_blank" rel="noopener noreferrer" className="text-gray-700 dark:text-gray-200 hover:text-blue-600" title="GitHub">
                       <FiGithub />
                     </a>
@@ -303,7 +290,7 @@ export default function AdminProjectsPage() {
                       <FiExternalLink />
                     </a>
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-2 sm:px-4 py-2 align-top">
                     {proj.video?.secure_url ? (
                       <a href={proj.video.secure_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 flex items-center gap-1" title="View Video">
                         <FiVideo /> <span className="hidden md:inline">Video</span>
@@ -312,14 +299,14 @@ export default function AdminProjectsPage() {
                       <span className="text-gray-400">No Video</span>
                     )}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-2 sm:px-4 py-2 align-top">
                     {proj.isFeatured ? (
                       <span className="text-green-600 font-semibold">Yes</span>
                     ) : (
                       <span className="text-gray-400">No</span>
                     )}
                   </td>
-                  <td className="px-4 py-2 flex gap-2">
+                  <td className="px-2 sm:px-4 py-2 flex flex-wrap gap-2 align-top">
                     <button
                       className="text-blue-600 hover:text-blue-800"
                       onClick={() => handleEdit(proj)}

@@ -174,21 +174,21 @@ export default function ChatBot() {
             boxShadow:
               '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)',
           }}
-          className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] z-50 flex flex-col"
+          className="fixed bottom-[calc(4rem+1.5rem)] right-0 left-0 mx-auto bg-white p-3 sm:p-6 rounded-lg border border-[#e5e7eb] w-full max-w-xs sm:max-w-md md:max-w-lg lg:w-[440px] h-[70vh] max-h-[634px] z-50 flex flex-col"
         >
           {/* Heading */}
-          <div className="flex flex-col space-y-1.5 pb-6">
+          <div className="flex flex-col space-y-1.5 pb-4 sm:pb-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
-                <p className="text-sm text-[#6b7280] leading-3">
+                <h2 className="font-semibold text-base sm:text-lg tracking-tight">Chatbot</h2>
+                <p className="text-xs sm:text-sm text-[#6b7280] leading-3">
                   Powered by Gemini &amp; Vercel
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setMessages([])}
-                className="ml-2 px-3 py-1 rounded-md text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                className="ml-2 px-2 sm:px-3 py-1 rounded-md text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 aria-label="Clear chat"
               >
                 Clear Chat
@@ -197,12 +197,12 @@ export default function ChatBot() {
           </div>
           {/* Chat Container */}
           <div
-            className="pr-4 h-[474px] flex-1 overflow-y-auto break-words"
+            className="pr-2 sm:pr-4 flex-1 overflow-y-auto break-words"
             style={{ minWidth: '100%', display: 'flex', flexDirection: 'column', wordBreak: 'break-word', overflowWrap: 'break-word' }}
           >
             <div className="flex-1 flex flex-col justify-end">
               {messages.length === 0 && (
-                <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+                <div className="flex gap-3 my-4 text-gray-600 text-xs sm:text-sm flex-1">
                   {aiAvatar}
                   <p className="leading-relaxed">
                     <span className="block font-bold text-gray-700">AI </span>Hi, I
@@ -213,7 +213,7 @@ export default function ChatBot() {
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`flex gap-3 my-4 text-gray-600 text-sm flex-1 ${
+                  className={`flex gap-3 my-4 text-gray-600 text-xs sm:text-sm flex-1 ${
                     msg.sender === 'user' ? 'flex-row-reverse' : ''
                   }`}
                 >
@@ -236,7 +236,7 @@ export default function ChatBot() {
               onSubmit={sendMessage}
             >
               <input
-                className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-xs sm:text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
                 placeholder={
                   loading ? 'Waiting for reply...' : 'Type your message'
                 }
@@ -245,7 +245,7 @@ export default function ChatBot() {
                 disabled={loading}
               />
               <button
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
+                className="inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-3 sm:px-4 py-2"
                 type="submit"
                 disabled={loading || !input.trim()}
               >

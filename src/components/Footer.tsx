@@ -6,9 +6,9 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 border-t border-gray-700 pt-10 pb-5 text-sm text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between gap-6">
+        <div className="flex flex-col md:flex-row justify-between gap-6 md:items-start items-center text-center md:text-left">
           {/* Contact Info Left */}
-          <div className="flex flex-col justify-center md:items-start text-left min-w-[180px]">
+          <div className="flex flex-col justify-center items-center md:items-start min-w-[180px]">
             <h4 className="text-lg font-semibold text-gray-100 mb-2">Contact</h4>
             <div className="text-xs text-gray-400">
               <div>
@@ -74,9 +74,9 @@ export default function Footer() {
           </div>
 
           {/* Social Links Right */}
-          <div className="flex flex-col items-end text-right min-w-[180px]">
+          <div className="flex flex-col items-center md:items-end min-w-[180px]">
             <h4 className="text-lg font-semibold text-gray-100 mb-2">Akshay Raj Kushwaha</h4>
-            <div className="flex space-x-4 text-xl mb-2 justify-end">
+            <div className="flex space-x-4 text-xl mb-2 justify-center md:justify-end">
               <a
                 href="https://github.com/gitsofakshay"
                 target="_blank"
